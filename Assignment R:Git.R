@@ -1,0 +1,11 @@
+library(readr)
+acs <- read.csv(url("http://stat511.cwick.co.nz/homeworks/acs_or.csv"))
+View(acs)
+summary(acs$income_husband)
+table(acs$mode)
+directions <- c("followup", "internet","mail")
+directions.factor <- factor(directions)
+directions.factor
+as.numeric(directions.factor)
+hist(acs$income_husband)
+plot(acs$income_husband)
