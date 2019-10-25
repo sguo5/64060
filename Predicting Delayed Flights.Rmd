@@ -1,0 +1,69 @@
+---
+title: "Predicting Delayed Flights"
+author: "Shude Guo"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r warning=FALSE}
+library(caret)
+library(ISLR)
+library(e1071)
+library(gmodels)
+library(pROC)
+setwd("~/Desktop")
+FD <- read.csv("FlightDelays.csv")
+summary(FD)
+```
+```{r}
+FD$CRS_DEP_TIME <- as.factor(FD$CRS_DEP_TIME)
+FD$DAY_WEEK <- as.factor(FD$DAY_WEEK)
+head(FD)
+```
+
+### Question 1
+#### Divide the data into 60% training and 40% validation
+```{r}
+set.seed(15)
+Train_Index = createDataPartition(FD$Flight.Status,p=0.6, list = FALSE)
+Train_Data = FD[Train_Index,]
+Validation_Data = FD[-Train_Index,]
+summary(Train_Data)
+summary(Validation_Data)
+```
+
+### Question 2
+#### Run the Naive Bayes model to predict whether the flight is delayed or not. Use only categorical variables for the predictor variables. Note that Week and Time variables need to recoded as factors
+```{r}
+nb_model <- naiveBayes(Flight.Status~CARRIER+DEST+ORIGIN,data = Train_Data)
+nb_model
+```
+
+### Question 3
+#### Output both a counts table and a proportion table outlining how many and what proportion of flights were delayed and on-time at each of the three airports.
+```{r}
+table(Train_Data$Flight.Status,Train_Data$DEST)
+prop.table(table(Train_Data$Flight.Status,Train_Data$DEST),margin = 1)
+```
+
+### Question 4
+#### Output the confusion matrix and ROC for the validation data
+```{r}
+Predicted_Test_labels <-predict(nb_model,Train_Data)
+confusionMatrix(Predicted_Test_labels, Train_Data$Flight.Status)
+```
+```{r}
+nb_model <- naiveBayes(Flight.Status~CARRIER+DEST+ORIGIN,data = Train_Data)
+Predicted_Test_labels <- predict(nb_model,Validation_Data, type = "raw")
+head(Predicted_Test_labels)
+Predicted_Test_labels1 <- predict(nb_model,Validation_Data)
+confusionMatrix(Predicted_Test_labels1,Validation_Data$Flight.Status)
+```
+```{r}
+roc(Validation_Data$Flight.Status,Predicted_Test_labels[,1])
+plot.roc(Validation_Data$Flight.Status,Predicted_Test_labels[,1])
+```
+
