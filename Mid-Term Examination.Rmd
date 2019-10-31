@@ -1,0 +1,75 @@
+---
+title: "Mid-Term Examination"
+author: "Shude Guo"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(factoextra)
+library(ISLR)
+library(flexclust)
+setwd("~/Desktop")
+Universities <- read.csv("Universities.csv")
+```
+
+### Question 1
+```{r}
+U <- na.omit(Universities)
+head(U)
+```
+
+### Question 2
+```{r}
+set.seed(123)
+df <- U[,c(4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)]
+df <- scale(df)
+distance <- get_dist(df)
+fviz_dist(distance)
+fviz_nbclust(df, kmeans, method = "wss")
+k5 <- kmeans(df, centers = 5, nstart = 25)
+k5$centers
+k5$size
+fviz_cluster(k5, data = df)
+```
+
+#### 5 clusters reasonable for describing these data.
+#### Optimal K = 5
+
+### Question 3
+#### Cluster 1: High application rate, high admission rate, high enrollment rate, high full-time undergraduate rate, low tuition.
+#### Cluster 2: Low composite index, lower faculty with PHD ratio.
+#### Cluster 3: Composite index is relatively average, low tuition, higher student and faculty ratio.
+#### Cluster 4: Composite index is relatively average.
+#### Cluster 5: Higher ratio on students from the top 10% and top 25%, higher tuition, higher ratio of room and board, higher faculty with PHD ratio, lower student and faculty ratio, higher graduation rate.
+
+### Question 4
+```{r}
+U_clustered <- data.frame(U, cluster=factor(k5$cluster))
+ggplot(U_clustered, aes(x=U$State, y=U$Public..1...Private..2., color=cluster)) + geom_point()
+```
+
+#### Clusters 1 and 3 are mostly distributed in public schools sector, while clusters 2, 4 and 5 are mostly distributed in private schools sector.
+
+### Question 5
+#### Clusters 1 and 3 are characterized by high tuition , while clusters 1 and 3 are mostly distributed in public schools. In addition, cluster 1 has the characteristics of high application rate, admission rate and enrollment rate, and cluster 3 has the higher ratio of students and faculty, which indicates that public schools have the characteristics of high tuition fee and higher admission rate.
+#### The data of cluster 5 has the characteristics of lower student and faculty ratio, while cluster 2 and 4 also have a medium and low ratio in the student and faculty ratio. It can be inferred that private schools have higher admission thresholds, or lower application and acceptance rates.
+
+### Question 6
+```{r}
+k5
+```
+```{r}
+set.seed(123)
+k5 = kcca(df, k=5, kccaFamily("kmeans"))
+k5
+clusters_index <- predict(k5)
+dist(k5@centers)
+image(k5)
+points(df, col=clusters_index, pch=19, cex=0.3)
+```
+
