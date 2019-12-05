@@ -1,0 +1,175 @@
+---
+title: "sguo5_finalexam"
+author: "Shude Guo"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Segmenting Consumers of Bath Soap
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(factoextra)
+library(ISLR)
+library(GGally)
+library(viridis)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r warning=FALSE}
+setwd("~/Desktop")
+BathSoap <- read.csv("BathSoap.csv")
+BathSoap <- data.frame(lapply(BathSoap, function(x) as.numeric(sub("%", "", x))))
+BathSoap <- BathSoap %>% mutate_at(c(20:46), funs(./100)) %>% mutate_at(c(20:46), funs(.*BathSoap$Total.Volume))
+head(BathSoap)
+BS <- scale(BathSoap[,-c(1:11)])
+BS <- cbind(BathSoap[,1:11],BS)
+head(BS)
+```
+
+## Identify clusters of households based on Purchase behavior
+```{r}
+fviz_nbclust(BS[,c(12:31)], kmeans, method = "wss")
+fviz_nbclust(BS[,c(12:31)], kmeans, method = "silhouette")
+set.seed(120)
+pk2 <- kmeans(BS[,c(12:31)], centers = 2, nstart = 25)
+pk2
+fviz_cluster(pk2, data = BS)
+```
+
+## Identify clusters of households based on Basis of purchase
+```{r}
+fviz_nbclust(BS[,c(32:46)], kmeans, method = "wss")
+fviz_nbclust(BS[,c(32:46)], kmeans, method = "silhouette")
+set.seed(120)
+bk4 <- kmeans(BS[,c(32:46)], centers = 4, nstart = 25)
+bk4
+fviz_cluster(bk4, data = BS)
+```
+
+## Purchase behavior and Basis of purchase, k = 3
+```{r}
+fviz_nbclust(BS[,c(12:46)], kmeans, method = "wss")
+fviz_nbclust(BS[,c(12:46)], kmeans, method = "silhouette")
+set.seed(120)
+k3 <- kmeans(BS[,c(12:46)], centers = 3, nstart = 25)
+k3
+fviz_cluster(k3, data = BS)
+k3center <- as.data.frame(k3$centers)
+colnames(k3center) <- c("No.Br","Br.Runs","Total.Vol","No.Trans","Value","Trans.Br.Runs","Vol.Tran","Avg.Price","PVNP","PVP6","PVOP","Br.57.144","Br.55","Br.272","Br.286","Br.24","Br.481","Br.352","Br.5","Br.999","Pt1","Pt2","Pt3","Pt4","Pt5","Pt6","Pt7","Pt8","Pt9","Pt10","Pt11","Pt12","Pt13","Pt14","Pt15")
+cluster <- matrix(c("1","2","3"),nrow = 3)
+k3center <- cbind(cluster,k3center)
+```
+
+### Purchase summary over the period, k = 3
+```{r}
+ggparcoord(k3center, columns = 2:9, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+### Purchase within promotion, k = 3
+```{r}
+ggparcoord(k3center, columns = 10:12, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+### Brandwise purchase, k = 3
+```{r}
+ggparcoord(k3center, columns = 13:21, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+### Price categorywise purchase, k = 3
+```{r}
+ggparcoord(k3center, columns = 22:25, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+### Selling propositionwise purchase, k = 3
+```{r}
+ggparcoord(k3center, columns = 26:36, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+## Purchase behavior and Basis of purchase, k = 2
+```{r}
+set.seed(120)
+k2 <- kmeans(BS[,c(12:46)], centers = 2, nstart = 25)
+k2
+fviz_cluster(k2, data = BS)
+k2center <- as.data.frame(k2$centers)
+colnames(k2center) <- c("No.Br","Br.Runs","Total.Vol","No.Trans","Value","Trans.Br.Runs","Vol.Tran","Avg.Price","PVNP","PVP6","PVOP","Br.57.144","Br.55","Br.272","Br.286","Br.24","Br.481","Br.352","Br.5","Br.999","Pt1","Pt2","Pt3","Pt4","Pt5","Pt6","Pt7","Pt8","Pt9","Pt10","Pt11","Pt12","Pt13","Pt14","Pt15")
+cluster <- matrix(c("1","2"),nrow = 2)
+k2center <- cbind(cluster,k2center)
+```
+
+### Purchase summary over the period, k = 2
+```{r}
+ggparcoord(k2center, columns = 2:9, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+### Purchase within promotion, k = 2
+```{r}
+ggparcoord(k2center, columns = 10:12, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+### Brandwise purchase, k = 2
+```{r}
+ggparcoord(k2center, columns = 13:21, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+### Price categorywise purchase, k = 2
+```{r}
+ggparcoord(k2center, columns = 22:25, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+### Selling propositionwise purchase, k = 2
+```{r}
+ggparcoord(k2center, columns = 26:36, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+## Purchase behavior and Basis of purchase, k = 4
+```{r}
+set.seed(120)
+k4 <- kmeans(BS[,c(12:46)], centers = 4, nstart = 25)
+k4
+fviz_cluster(k4, data = BS)
+k4center <- as.data.frame(k4$centers)
+colnames(k4center) <- c("No.Br","Br.Runs","Total.Vol","No.Trans","Value","Trans.Br.Runs","Vol.Tran","Avg.Price","PVNP","PVP6","PVOP","Br.57.144","Br.55","Br.272","Br.286","Br.24","Br.481","Br.352","Br.5","Br.999","Pt1","Pt2","Pt3","Pt4","Pt5","Pt6","Pt7","Pt8","Pt9","Pt10","Pt11","Pt12","Pt13","Pt14","Pt15")
+cluster <- matrix(c("1","2","3","4"),nrow = 4)
+k4center <- cbind(cluster,k4center)
+```
+
+### Purchase summary over the period, k = 4
+```{r}
+ggparcoord(k4center, columns = 2:9, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+### Purchase within promotion, k = 4
+```{r}
+ggparcoord(k4center, columns = 10:12, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+### Brandwise purchase, k = 4
+```{r}
+ggparcoord(k4center, columns = 13:21, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+### Price categorywise purchase, k = 4
+```{r}
+ggparcoord(k4center, columns = 22:25, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+### Selling propositionwise purchase, k = 4
+```{r}
+ggparcoord(k4center, columns = 26:36, groupColumn = 1, showPoints = TRUE, alphaLines = 0.3)
+```
+
+
+### By comparing k2, k3 and k4, I think k3 is the best segmentation. Because the clusters from k2 is too broad to achieve the purpose of market segmentation, and two clusters cannot properly characterize the data. And the clusters from k4 is too narrow for market segmentation, some clusters have similar characteristics.
+
+#### Features of cluster 1: Low customer loyalty, low sensitivity to discount, relatively average purchase rate of different brands, no specific requirements on the price and type of goods, low number of purchased brands, low continuous purchase volume, low total purchase volume, low average single purchase volume, low total purchase value but high average purchase price
+
+#### Features of cluster 2: High customer loyalty, low number of brands purchased, high purchase volume for specific brands, high purchase volume for certain types of products and certain price level, different sensitivity to different discount, low number of consecutive purchases, high average purchase volume but low total value
+
+#### Features of cluster 3: Medium customer loyalty, high sensitivity to discount (increase purchases for specific discount), strong purchase desire, medium purchase volume of each brand, high number of brands purchased, high total purchase volume and total value, no specific requirements on the price and type of goods, tend to consecutive purchase
+
